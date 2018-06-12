@@ -16,9 +16,7 @@ class CategoryViewController: UITableViewController {
     
     let realm = try! Realm()
     
-    var categoryArray : [Category] = []
-//    let theContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
+    var categories: Results<Category>?
 
     // MARK: - viewDidLoad()
     
@@ -33,13 +31,13 @@ class CategoryViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "categoryCell", for: indexPath)
-        cell.textLabel?.text = categoryArray[indexPath.row].name
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Category Added Yet"
         
         return cell
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categoryArray.count
+        return categories?.count ?? 1
     }
     
     
@@ -56,7 +54,7 @@ class CategoryViewController: UITableViewController {
         let destinationVC = segue.destination as! TodoListViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = categoryArray[indexPath.row]
+            destinationVC.selectedCategory = categories?[indexPath.row]
         }
     }
     
@@ -71,7 +69,6 @@ class CategoryViewController: UITableViewController {
             let theCategory = Category()
             let categoryName = textField.text
             theCategory.name = categoryName!
-            self.categoryArray.append(theCategory)
             
             self.saveCategory(theCategory)
         }
@@ -102,12 +99,10 @@ class CategoryViewController: UITableViewController {
         tableView.reloadData()
     }
     
-    func loadCategory(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
-        do {
-            categoryArray = try theContext.fetch(request)
-        } catch {
-            print("error fetch category array \(error)")
-        }
+    func loadCategory() {
+        
+        categories = realm.objects(Category.self)
+
         tableView.reloadData()
     }
     
